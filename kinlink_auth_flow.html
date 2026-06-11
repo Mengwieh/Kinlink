@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C8A96E;
+  --gold-light: #E8D5A3;
+  --gold-dark: #9B7A3D;
+  --earth: #3D2B1F;
+  --earth-mid: #6B4C35;
+  --cream: #F9F4ED;
+  --cream-dark: #EDE4D6;
+  --accent: #1A5C4A;
+  --accent-light: #2A7A62;
+  --text-primary: #1C1209;
+  --text-muted: #7A6655;
+  --border: rgba(200,169,110,0.25);
+  --border-focus: rgba(200,169,110,0.6);
+  --error: #B03A2E;
+  --success: #1A5C4A;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 48px;
+  border-bottom: 0.5px solid var(--border);
+  background: rgba(249,244,237,0.97);
+}
+.logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.logo-icon { width: 34px; height: 34px; background: var(--earth); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-text { font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 600; color: var(--earth); letter-spacing: 0.5px; }
+.logo-text span { color: var(--gold-dark); }
+.nav-right { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--text-muted); }
+.btn { padding: 8px 20px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-ghost { background: transparent; border: 0.5px solid var(--border); color: var(--text-muted); }
+.btn-ghost:hover { background: var(--cream-dark); }
+.btn-primary { background: var(--earth); color: var(--cream); }
+.btn-primary:hover { background: var(--earth-mid); }
+.btn-gold { background: var(--gold-dark); color: white; }
+.btn-gold:hover { background: var(--gold); }
+.btn-full { width: 100%; padding: 12px; font-size: 14px; }
+.btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text-primary); width: 100%; padding: 11px; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+.btn-outline:hover { background: var(--cream-dark); }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── STEP TABS ── */
+.step-tabs {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border-bottom: 0.5px solid var(--border);
+}
+.step-tab {
+  flex: 1; padding: 10px 0; text-align: center;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.step-tab.done { color: var(--accent); border-bottom-color: var(--accent); }
+.step-tab.active { color: var(--earth); border-bottom-color: var(--earth); }
+.step-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600;
+  background: var(--cream-dark); color: var(--text-muted);
+  flex-shrink: 0;
+}
+.step-tab.done .step-dot { background: var(--accent); color: white; }
+.step-tab.active .step-dot { background: var(--earth); color: var(--cream); }
+
+/* ── AUTH LAYOUT ── */
+.auth-layout {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 62px);
+}
+.auth-left {
+  background: var(--earth);
+  padding: 56px 52px;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.auth-left-bg {
+  position: absolute; inset: 0; opacity: .05;
+  background-image: radial-gradient(circle at 30% 40%, var(--gold) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, var(--accent) 0%, transparent 50%);
+}
+/* Decorative tree lines on left panel */
+.tree-lines { position: absolute; inset: 0; opacity: .08; }
+.auth-left-content { position: relative; z-index: 2; }
+.auth-left h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px; font-weight: 600; color: var(--cream);
+  line-height: 1.15; margin-bottom: 14px;
+}
+.auth-left h2 em { font-style: italic; color: var(--gold-light); }
+.auth-left p { font-size: 14px; color: rgba(249,244,237,.55); line-height: 1.7; max-width: 320px; margin-bottom: 32px; }
+
+/* Decorative card in left panel */
+.preview-card {
+  background: rgba(249,244,237,.06);
+  border: 0.5px solid rgba(200,169,110,.25);
+  border-radius: 12px; padding: 18px 20px;
+  max-width: 300px;
+}
+.preview-card-label { font-size: 10px; color: rgba(200,169,110,.5); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+.preview-person { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.preview-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.pa-green { background: rgba(26,92,74,.45); color: #7ECBB8; }
+.pa-gold { background: rgba(200,169,110,.28); color: var(--gold-light); }
+.preview-name { font-size: 12px; color: rgba(249,244,237,.7); }
+.preview-meta { font-size: 10px; color: rgba(200,169,110,.5); }
+.preview-result {
+  background: rgba(26,92,74,.2); border: 0.5px solid rgba(26,92,74,.4);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 11px; color: #7ECBB8; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+/* Bullets list */
+.auth-bullets { list-style: none; margin-top: 28px; display: flex; flex-direction: column; gap: 10px; }
+.auth-bullet { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: rgba(249,244,237,.6); }
+.bullet-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 5px; }
+
+/* ── RIGHT PANEL ── */
+.auth-right {
+  padding: 48px 56px;
+  display: flex; flex-direction: column; justify-content: center;
+  overflow-y: auto;
+}
+.auth-right-inner { max-width: 380px; margin: 0 auto; width: 100%; }
+.auth-heading { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--earth); margin-bottom: 4px; }
+.auth-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.auth-sub a { color: var(--gold-dark); cursor: pointer; text-decoration: none; }
+.auth-sub a:hover { text-decoration: underline; }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+input, select, textarea {
+  width: 100%; padding: 10px 13px;
+  background: white; border: 0.5px solid var(--border);
+  border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--text-primary); outline: none;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
+input::placeholder { color: #C4B5A5; }
+select { cursor: pointer; }
+textarea { resize: none; }
+
+.input-with-icon { position: relative; }
+.input-with-icon i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; cursor: pointer; }
+.input-with-icon input { padding-right: 38px; }
+
+.form-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; font-size: 12px; color: var(--text-muted);
+}
+.form-divider::before, .form-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+/* Phone input */
+.phone-row { display: grid; grid-template-columns: 88px 1fr; gap: 8px; }
+
+/* Progress */
+.progress-bar-wrap { height: 3px; background: var(--cream-dark); border-radius: 2px; margin-bottom: 28px; }
+.progress-bar { height: 100%; background: var(--gold-dark); border-radius: 2px; transition: width .4s ease; }
+
+/* OTP */
+.otp-row { display: flex; gap: 10px; justify-content: center; margin: 24px 0; }
+.otp-input {
+  width: 48px; height: 52px; text-align: center;
+  font-size: 22px; font-weight: 600; font-family: 'Cormorant Garamond', serif;
+  border-radius: 8px; padding: 0;
+}
+.otp-input:focus { border-color: var(--gold-dark); }
+
+/* Clan chips */
+.clan-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.clan-chip {
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  border: 0.5px solid var(--border);
+  background: white; color: var(--text-muted);
+  cursor: pointer; transition: all .2s;
+}
+.clan-chip.selected { border-color: var(--gold-dark); background: rgba(200,169,110,.12); color: var(--gold-dark); }
+.clan-chip:hover { border-color: var(--gold); }
+
+/* Radio role cards */
+.role-cards { display: flex; flex-direction: column; gap: 10px; }
+.role-card {
+  border: 0.5px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  cursor: pointer; transition: all .2s;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.role-card.selected { border-color: var(--gold-dark); background: rgba(200,169,110,.06); }
+.role-card:hover { border-color: rgba(200,169,110,.5); }
+.role-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.ri-earth { background: rgba(61,43,31,.08); }
+.ri-green { background: rgba(26,92,74,.08); }
+.ri-gold { background: rgba(200,169,110,.14); }
+.role-title { font-size: 13px; font-weight: 500; color: var(--earth); margin-bottom: 2px; }
+.role-desc { font-size: 12px; color: var(--text-muted); }
+.role-radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border); margin-left: auto; margin-top: 2px; flex-shrink: 0; transition: all .2s; }
+.role-card.selected .role-radio { border-color: var(--gold-dark); background: var(--gold-dark); box-shadow: inset 0 0 0 3px white; }
+
+/* Success */
+.success-screen { text-align: center; padding: 40px 0; }
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(26,92,74,.1);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; font-size: 30px;
+}
+.success-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--earth); margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
+
+/* ── LOGIN SCREEN ── */
+.login-wrap { max-width: 420px; margin: 0 auto; padding: 40px 24px; }
+.login-center { min-height: calc(100vh - 62px); display: flex; align-items: center; justify-content: center; }
+
+/* ── Forgot password ── */
+.forgot-wrap { max-width: 380px; margin: 0 auto; text-align: center; padding: 20px 0; }
+
+/* Alerts */
+.alert { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.alert-error { background: rgba(176,58,46,.08); border: 0.5px solid rgba(176,58,46,.25); color: var(--error); }
+.alert-success { background: rgba(26,92,74,.08); border: 0.5px solid rgba(26,92,74,.25); color: var(--success); }
+
+.help-text { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.required { color: var(--gold-dark); }
+
+/* Scrollable content area */
+.auth-right::-webkit-scrollbar { width: 4px; }
+.auth-right::-webkit-scrollbar-track { background: transparent; }
+.auth-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+@media (max-width: 980px) {
+  nav { flex-wrap: wrap; gap: 12px; padding: 14px 20px; }
+  .nav-right { width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+  .page-title { font-size: 36px; }
+  .auth-layout { grid-template-columns: 1fr; }
+  .auth-left, .auth-right { padding: 32px 20px; }
+  .auth-right-inner { width: 100%; }
+  .auth-list { gap: 18px; }
+  .auth-list-item { padding: 16px 18px; }
+  .form-row, .phone-row { grid-template-columns: 1fr; }
+  .field-half { width: 100%; }
+  .switch-tabs { flex-wrap: wrap; gap: 10px; }
+}
+
+@media (max-width: 640px) {
+  .auth-left { padding: 24px 16px; }
+  .auth-right { padding: 24px 16px; }
+  .page-title { font-size: 30px; }
+  .auth-left p, .auth-panel { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showScreen('login')">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="5" r="2.5" fill="#C8A96E"/>
+        <circle cx="4" cy="12" r="2" fill="#C8A96E" opacity=".6"/>
+        <circle cx="14" cy="12" r="2" fill="#C8A96E" opacity=".6"/>
+        <line x1="9" y1="7.5" x2="4" y2="10" stroke="#C8A96E" stroke-width="1" opacity=".5"/>
+        <line x1="9" y1="7.5" x2="14" y2="10" stroke="#C8A96E" stroke-width="1" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="logo-text">Kin<span>Link</span></div>
+  </div>
+  <div class="nav-right">
+    <span id="nav-hint">Already have an account?</span>
+    <button class="btn btn-ghost" onclick="showScreen('login')" id="nav-login-btn">Sign in</button>
+    <button class="btn btn-primary" onclick="showScreen('register')" id="nav-register-btn">Get started</button>
+  </div>
+</nav>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="auth-layout">
+    <!-- Left Panel -->
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Welcome back to<br><em>your roots.</em></h2>
+        <p>Sign in to explore your family network, check relationships, and connect with relatives across generations.</p>
+        <div class="preview-card">
+          <div class="preview-card-label">Relationship check</div>
+          <div class="preview-person">
+            <div class="preview-avatar pa-green">AN</div>
+            <div>
+              <div class="preview-name">Amara Nkosi</div>
+              <div class="preview-meta">Nkosi · Moyo lineage</div>
+            </div>
+          </div>
+          <div class="preview-person" style="margin-bottom:12px">
+            <div class="preview-avatar pa-gold">KN</div>
+            <div>
+              <div class="preview-name">Kagiso Ndlovu</div>
+              <div class="preview-meta">Ndlovu · Zulu lineage</div>
+            </div>
+          </div>
+          <div class="preview-result">
+            <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#7ECBB8"/></svg>
+            Second cousins · 5° separation
+          </div>
+        </div>
+        <ul class="auth-bullets">
+          <li class="auth-bullet"><div class="bullet-dot"></div>Instant relationship detection across millions of profiles</li>
+          <li class="auth-bullet"><div class="bullet-dot"></div>Visual family tree spanning 8+ generations</li>
+          <li class="auth-bullet"><div class="bullet-dot"></div>Verified by family elders and community heads</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right: Login Form -->
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Sign in</div>
+        <div class="auth-sub">New here? <a onclick="showScreen('register')">Create a free account →</a></div>
+
+        <button class="btn-outline" style="margin-bottom:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button class="btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="var(--text-muted)"/></svg>
+          Continue with Phone
+        </button>
+
+        <div class="form-divider" >or sign in with email</div>
+
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group" >
+          <label>Password</label>
+          <div class="input-with-icon">
+            <input type="password" required placeholder="Your password" id="pw-login">
+            <i class="ti ti-eye" onclick="togglePw('pw-login', this)"></i>
+          </div>
+          <div style="text-align:right;margin-top:6px">
+            <a style="font-size:12px;color:var(--gold-dark);cursor:pointer" onclick="showScreen('forgot')">Forgot password?</a>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="window.location.href='user dashboard.html'" style="margin-top:4px">Sign in →</button>
+
+        <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:20px;line-height:1.6">
+          By continuing you agree to KinLink's <a style="color:var(--gold-dark)">Terms of Service</a> and <a style="color:var(--gold-dark)">Privacy Policy</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER — STEP 1: Account ══════════════ -->
+<div class="screen" id="screen-register">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Join your<br>family's <em>legacy.</em></h2>
+        <p>Create your profile and begin tracing your lineage. Every person you add strengthens the community's ancestral network.</p>
+        <ul class="auth-bullets">
+          <li class="auth-bullet"><div class="bullet-dot"></div>Step 1 — Create your account</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 2 — Verify your identity</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 3 — Your heritage profile</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 4 — Choose your role</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Create account</div>
+        <div class="auth-sub">Already a member? <a onclick="showScreen('login')">Sign in →</a></div>
+
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:25%"></div></div>
+
+        <div class="step-tabs">
+          <div class="step-tab active"><div class="step-dot">1</div>Account</div>
+          <div class="step-tab"><div class="step-dot">2</div>Verify</div>
+          <div class="step-tab"><div class="step-dot">3</div>Heritage</div>
+          <div class="step-tab"><div class="step-dot">4</div>Role</div>
+        </div>
+
+        <button class="btn-outline" style="margin-bottom:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="form-divider">or register with email</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>First name <span class="required">*</span></label>
+            <input type="text" placeholder="Amara">
+          </div>
+          <div class="form-group">
+            <label>Last name <span class="required">*</span></label>
+            <input type="text" placeholder="Nkosi">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email address <span class="required">*</span></label>
+          <input type="email" placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+          <label>Phone number <span class="required">*</span></label>
+          <div class="phone-row">
+            <select>
+              <option>🇿🇼 +263</option>
+              <option>🇳🇬 +234</option>
+              <option>🇰🇪 +254</option>
+              <option>🇿🇦 +27</option>
+              <option>🇬🇭 +233</option>
+              <option>🇸🇳 +221</option>
+              <option>🇨🇲 +237</option>
+              <option>🇺🇬 +256</option>
+            </select>
+            <input type="tel" placeholder="77 123 4567">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password <span class="required">*</span></label>
+          <div class="input-with-icon">
+            <input type="password" required placeholder="Min. 8 characters" id="pw-reg">
+            <i class="ti ti-eye" onclick="togglePw('pw-reg', this)"></i>
+          </div>
+          <div class="help-text">Must contain uppercase, number and special character.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm password <span class="required">*</span></label>
+          <input type="password" required placeholder="Repeat password">
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="showScreen('register-verify')">Continue →</button>
+
+        <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:16px;line-height:1.6">
+          By creating an account you agree to our <a style="color:var(--gold-dark)">Terms</a> and <a style="color:var(--gold-dark)">Privacy Policy</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER — STEP 2: Verify ══════════════ -->
+<div class="screen" id="screen-register-verify">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Verify your<br><em>identity.</em></h2>
+        <p>KinLink uses identity verification to protect families from fake accounts and ensure every profile in the network is real.</p>
+        <ul class="auth-bullets">
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 1 — Create your account ✓</li>
+          <li class="auth-bullet"><div class="bullet-dot"></div>Step 2 — Verify your identity</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 3 — Your heritage profile</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 4 — Choose your role</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Verify your account</div>
+        <div class="auth-sub">We sent a 6-digit code to <strong style="color:var(--earth)">+263 77 ••• ••67</strong></div>
+
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:50%"></div></div>
+
+        <div class="step-tabs">
+          <div class="step-tab done"><div class="step-dot">✓</div>Account</div>
+          <div class="step-tab active"><div class="step-dot">2</div>Verify</div>
+          <div class="step-tab"><div class="step-dot">3</div>Heritage</div>
+          <div class="step-tab"><div class="step-dot">4</div>Role</div>
+        </div>
+
+        <div style="text-align:center;margin-bottom:8px">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Phone verification code</div>
+          <div class="otp-row">
+            <input class="otp-input" maxlength="1" type="text" id="otp1" oninput="otpNext(this,'otp2')">
+            <input class="otp-input" maxlength="1" type="text" id="otp2" oninput="otpNext(this,'otp3')">
+            <input class="otp-input" maxlength="1" type="text" id="otp3" oninput="otpNext(this,'otp4')">
+            <input class="otp-input" maxlength="1" type="text" id="otp4" oninput="otpNext(this,'otp5')">
+            <input class="otp-input" maxlength="1" type="text" id="otp5" oninput="otpNext(this,'otp6')">
+            <input class="otp-input" maxlength="1" type="text" id="otp6">
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:8px">
+            Didn't receive it? <a style="color:var(--gold-dark);cursor:pointer">Resend code</a> · <a style="color:var(--gold-dark);cursor:pointer">Use email instead</a>
+          </div>
+        </div>
+
+        <div style="background:var(--cream-dark);border-radius:10px;padding:16px;margin:20px 0">
+          <div style="font-size:12px;font-weight:500;color:var(--earth);margin-bottom:8px">Also verify your email</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Check your inbox at <strong>amara@example.com</strong> and click the link we sent.</div>
+          <div class="alert alert-success" style="margin:0;font-size:12px">
+            <i class="ti ti-circle-check" style="font-size:15px"></i>
+            Email verification link sent
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="showScreen('register-heritage')">Confirm & Continue →</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showScreen('register')">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER — STEP 3: Heritage ══════════════ -->
+<div class="screen" id="screen-register-heritage">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Tell us your<br><em>heritage.</em></h2>
+        <p>Your clan, village, and lineage information is the foundation of the relationship graph. The more detail you add, the better the network can serve your community.</p>
+        <ul class="auth-bullets">
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Account created ✓</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Identity verified ✓</li>
+          <li class="auth-bullet"><div class="bullet-dot"></div>Step 3 — Your heritage profile</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Step 4 — Choose your role</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-right" style="padding-top:32px;padding-bottom:32px">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Your heritage profile</div>
+        <div class="auth-sub">This builds your node in the family graph.</div>
+
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:75%"></div></div>
+
+        <div class="step-tabs">
+          <div class="step-tab done"><div class="step-dot">✓</div>Account</div>
+          <div class="step-tab done"><div class="step-dot">✓</div>Verify</div>
+          <div class="step-tab active"><div class="step-dot">3</div>Heritage</div>
+          <div class="step-tab"><div class="step-dot">4</div>Role</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date of birth <span class="required">*</span></label>
+            <input type="date">
+          </div>
+          <div class="form-group">
+            <label>Gender <span class="required">*</span></label>
+            <select>
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Father's full name</label>
+          <input type="text" placeholder="e.g. Joseph Nkosi">
+          <div class="help-text">Helps link you to existing family nodes in the network.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Mother's full name</label>
+          <input type="text" placeholder="e.g. Grace Moyo (née Moyo)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Clan / family name <span class="required">*</span></label>
+            <input type="text" placeholder="e.g. Nkosi">
+          </div>
+          <div class="form-group">
+            <label>Tribe / ethnic group</label>
+            <input type="text" placeholder="e.g. Ndebele">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Totem / praise name</label>
+          <input type="text" placeholder="e.g. Elephant (Ndlovu)">
+          <div class="help-text">Used for clan relationship matching within your community.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Village / hometown <span class="required">*</span></label>
+            <input type="text" placeholder="e.g. Bulawayo">
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <select>
+              <option>Zimbabwe</option>
+              <option>Nigeria</option>
+              <option>Kenya</option>
+              <option>South Africa</option>
+              <option>Ghana</option>
+              <option>Cameroon</option>
+              <option>Uganda</option>
+              <option>Senegal</option>
+              <option>Ethiopia</option>
+              <option>Tanzania</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Select your clan (quick pick)</label>
+          <div class="clan-chips">
+            <div class="clan-chip selected" onclick="toggleChip(this)">Nkosi</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Dube</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Moyo</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Zulu</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Ndlovu</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Mthembu</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Khumalo</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Okafor</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Mensah</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Diallo</div>
+            <div class="clan-chip" onclick="toggleChip(this)">Other</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="showScreen('register-role')" style="margin-top:8px">Continue →</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showScreen('register-verify')">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER — STEP 4: Role ══════════════ -->
+<div class="screen" id="screen-register-role">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Your role in<br>the <em>network.</em></h2>
+        <p>Different roles give different levels of access and responsibility within the family graph.</p>
+        <ul class="auth-bullets">
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Account created ✓</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Identity verified ✓</li>
+          <li class="auth-bullet" style="opacity:.45"><div class="bullet-dot" style="background:rgba(200,169,110,.3)"></div>Heritage profile set ✓</li>
+          <li class="auth-bullet"><div class="bullet-dot"></div>Step 4 — Choose your role</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Choose your role</div>
+        <div class="auth-sub">You can change or upgrade this later.</div>
+
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:95%"></div></div>
+
+        <div class="step-tabs">
+          <div class="step-tab done"><div class="step-dot">✓</div>Account</div>
+          <div class="step-tab done"><div class="step-dot">✓</div>Verify</div>
+          <div class="step-tab done"><div class="step-dot">✓</div>Heritage</div>
+          <div class="step-tab active"><div class="step-dot">4</div>Role</div>
+        </div>
+
+        <div class="role-cards">
+          <div class="role-card" onclick="selectRole(this)">
+            <div class="role-icon ri-earth">👤</div>
+            <div style="flex:1">
+              <div class="role-title">Regular Member</div>
+              <div class="role-desc">Add yourself, your immediate family, and connect to existing relatives. Check relationships and explore the tree.</div>
+            </div>
+            <div class="role-radio"></div>
+          </div>
+          <div class="role-card selected" onclick="selectRole(this)">
+            <div class="role-icon ri-gold">🌳</div>
+            <div style="flex:1">
+              <div class="role-title">Family Head</div>
+              <div class="role-desc">An elder or family historian who can verify other members' entries, manage a family branch, and resolve disputes.</div>
+            </div>
+            <div class="role-radio"></div>
+          </div>
+          <div class="role-card" onclick="selectRole(this)">
+            <div class="role-icon ri-green">🔍</div>
+            <div style="flex:1">
+              <div class="role-title">Read-Only / Guest</div>
+              <div class="role-desc">Search the network and check relationships without adding or editing any profiles. No verification required.</div>
+            </div>
+            <div class="role-radio"></div>
+          </div>
+        </div>
+
+        <div style="background:rgba(200,169,110,.08);border:0.5px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:16px;font-size:12px;color:var(--text-muted);line-height:1.6">
+          <strong style="color:var(--earth)">Family Head requires approval</strong> — your request will be reviewed by an existing verified elder in your clan. This usually takes 1–3 days.
+        </div>
+
+        <button class="btn btn-gold btn-full" onclick="showScreen('register-done')" style="margin-top:20px">Complete registration →</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showScreen('register-heritage')">← Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER — DONE ══════════════ -->
+<div class="screen" id="screen-register-done">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <svg class="tree-lines" viewBox="0 0 400 600" preserveAspectRatio="none">
+        <line x1="200" y1="580" x2="200" y2="300" stroke="white" stroke-width="1"/>
+        <line x1="200" y1="380" x2="100" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="200" y1="380" x2="300" y2="200" stroke="white" stroke-width=".8"/>
+        <line x1="100" y1="220" x2="50" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="100" y1="220" x2="150" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="250" y2="100" stroke="white" stroke-width=".5"/>
+        <line x1="300" y1="220" x2="350" y2="100" stroke="white" stroke-width=".5"/>
+      </svg>
+      <div class="auth-left-content">
+        <h2>Welcome to<br>the <em>network.</em></h2>
+        <p>Your node is now part of the KinLink ancestry graph. Start adding family members to grow your branch of the tree.</p>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="success-screen">
+          <div class="success-icon">🌿</div>
+          <div class="success-title">You're in, Amara!</div>
+          <div class="success-sub">Your profile has been created and added to the KinLink family graph. You are now connected to the ancestral network.<br><br>Next: build out your family tree by adding your parents and grandparents.</div>
+          <button class="btn btn-gold btn-full" style="margin-bottom:10px">Start building my tree →</button>
+          <button class="btn btn-ghost btn-full" onclick="showScreen('login')">Go to dashboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FORGOT PASSWORD ══════════════ -->
+<div class="screen" id="screen-forgot">
+  <div class="auth-layout">
+    <div class="auth-left">
+      <div class="auth-left-bg"></div>
+      <div class="auth-left-content">
+        <h2>Reset your<br><em>password.</em></h2>
+        <p>Enter the email or phone number on your account and we'll send you a secure reset link.</p>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-right-inner">
+        <div class="auth-heading">Forgot password</div>
+        <div class="auth-sub"><a onclick="showScreen('login')">← Back to sign in</a></div>
+
+        <div class="form-group" style="margin-top:8px">
+          <label>Email or phone number</label>
+          <input type="text" placeholder="you@example.com or +263…">
+        </div>
+
+        <button class="btn btn-primary btn-full" style="margin-bottom:12px">Send reset link →</button>
+
+        <div style="text-align:center;font-size:12px;color:var(--text-muted)">
+          Remember it? <a style="color:var(--gold-dark);cursor:pointer" onclick="showScreen('login')">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Redirect placeholder -->
+<div class="screen" id="screen-dashboard-redirect">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 62px);flex-direction:column;gap:14px">
+    <div style="font-size:30px">🌳</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--earth)">Signing you in…</div>
+    <div style="font-size:13px;color:var(--text-muted)">Redirecting to your dashboard</div>
+    <button class="btn btn-ghost" onclick="showScreen('login')" style="margin-top:8px">← Back</button>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+}
+
+function togglePw(id, icon) {
+  const inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'ti ti-eye-off'; }
+  else { inp.type = 'password'; icon.className = 'ti ti-eye'; }
+}
+
+function otpNext(el, nextId) {
+  if (el.value.length === 1 && nextId) {
+    const next = document.getElementById(nextId);
+    if (next) next.focus();
+  }
+}
+
+function toggleChip(el) {
+  el.classList.toggle('selected');
+}
+
+function selectRole(el) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+window.onload = function () {
+
+ const hash = window.location.hash;
+
+ if(hash){
+
+   const page = hash.replace('#page-','');
+
+   goTo(page);
+
+ }
+
+}
+
+function goTo(pageName){
+
+document.querySelectorAll('.page')
+.forEach(page=>{
+    page.classList.remove('active');
+});
+
+document
+.getElementById('page-' + pageName)
+.classList.add('active');
+
+window.scrollTo({
+    top:0,
+    behavior:'smooth'
+});
+
+}
+</script>
+</script>
+</body>
+</html>

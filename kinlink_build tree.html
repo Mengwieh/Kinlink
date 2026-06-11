@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C8A96E; --gold-light: #E8D5A3; --gold-dark: #9B7A3D;
+  --earth: #3D2B1F; --earth-mid: #6B4C35;
+  --cream: #F9F4ED; --cream-dark: #EDE4D6;
+  --accent: #1A5C4A; --accent-light: #2A7A62;
+  --text-primary: #1C1209; --text-muted: #7A6655;
+  --border: rgba(200,169,110,0.25); --border-focus: rgba(200,169,110,0.6);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-primary); min-height: 100vh; }
+
+/* NAV */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 48px; border-bottom: 0.5px solid var(--border);
+  background: rgba(249,244,237,0.97); position: sticky; top: 0; z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 34px; height: 34px; background: var(--earth); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.logo-text { font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 600; color: var(--earth); }
+.logo-text span { color: var(--gold-dark); }
+.nav-right { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--text-muted); }
+.skip-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color .2s; }
+.skip-link:hover { color: var(--earth); }
+
+/* LAYOUT */
+.onboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 62px); }
+
+/* SIDEBAR STEPPER */
+.ob-sidebar {
+  background: var(--earth); padding: 36px 28px;
+  display: flex; flex-direction: column; gap: 0;
+  position: relative; overflow: hidden;
+}
+.ob-sidebar-bg { position: absolute; inset: 0; opacity: .05;
+  background-image: radial-gradient(circle at 20% 30%, var(--gold) 0%, transparent 55%),
+  radial-gradient(circle at 80% 80%, var(--accent) 0%, transparent 50%); }
+.ob-sidebar-tree { position: absolute; inset: 0; opacity: .06; }
+.ob-sidebar-inner { position: relative; z-index: 2; }
+
+.ob-welcome { margin-bottom: 32px; }
+.ob-welcome-label { font-size: 10px; color: rgba(200,169,110,.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.ob-welcome-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--cream); line-height: 1.2; }
+.ob-welcome-name em { font-style: italic; color: var(--gold-light); }
+.ob-welcome-sub { font-size: 12px; color: rgba(249,244,237,.45); margin-top: 6px; line-height: 1.6; }
+
+/* Steps list */
+.ob-steps { display: flex; flex-direction: column; gap: 0; }
+.ob-step { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; position: relative; cursor: pointer; }
+.ob-step:not(:last-child)::after {
+  content: ''; position: absolute; left: 14px; top: 38px;
+  width: 1px; height: calc(100% - 12px);
+  background: rgba(200,169,110,.2);
+}
+.ob-step.done:not(:last-child)::after { background: rgba(78,203,113,.35); }
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  border: 1.5px solid rgba(200,169,110,.3);
+  background: transparent; color: rgba(200,169,110,.5);
+  transition: all .3s; z-index: 1;
+}
+.ob-step.done .step-circle { background: var(--accent); border-color: var(--accent); color: white; }
+.ob-step.active .step-circle { background: var(--gold-dark); border-color: var(--gold-dark); color: white; }
+.step-info { flex: 1; padding-top: 3px; }
+.step-name { font-size: 13px; font-weight: 500; color: rgba(249,244,237,.4); transition: color .2s; }
+.step-desc { font-size: 11px; color: rgba(200,169,110,.3); margin-top: 1px; transition: color .2s; }
+.ob-step.done .step-name { color: rgba(249,244,237,.6); }
+.ob-step.done .step-desc { color: rgba(200,169,110,.4); }
+.ob-step.active .step-name { color: var(--cream); }
+.ob-step.active .step-desc { color: rgba(200,169,110,.65); }
+
+/* Progress at bottom */
+.ob-progress { margin-top: auto; padding-top: 28px; }
+.ob-progress-label { font-size: 11px; color: rgba(200,169,110,.4); margin-bottom: 8px; display: flex; justify-content: space-between; }
+.ob-progress-track { height: 3px; background: rgba(200,169,110,.15); border-radius: 2px; }
+.ob-progress-fill { height: 100%; background: var(--gold-dark); border-radius: 2px; transition: width .4s ease; }
+
+/* MAIN CONTENT */
+.ob-main { overflow-y: auto; }
+.ob-panel { display: none; padding: 44px 52px; min-height: calc(100vh - 62px); flex-direction: column; }
+.ob-panel.active { display: flex; }
+
+.ob-panel-header { margin-bottom: 32px; }
+.ob-step-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--gold-dark); background: rgba(200,169,110,.1);
+  border: 0.5px solid var(--border); border-radius: 20px;
+  padding: 4px 12px; margin-bottom: 12px;
+}
+.ob-panel-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; color: var(--earth); line-height: 1.15; margin-bottom: 8px; }
+.ob-panel-title em { font-style: italic; color: var(--gold-dark); }
+.ob-panel-sub { font-size: 14px; color: var(--text-muted); line-height: 1.65; max-width: 520px; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1 / -1; }
+label { display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+input, select, textarea {
+  width: 100%; padding: 10px 13px;
+  background: white; border: 0.5px solid var(--border);
+  border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--text-primary); outline: none; transition: border-color .2s;
+}
+input:focus, select:focus { border-color: var(--border-focus); }
+input::placeholder { color: #C4B5A5; }
+.help-text { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.required { color: var(--gold-dark); }
+
+/* PERSON CARD (for family members) */
+.member-section { margin-bottom: 28px; }
+.member-section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500; color: var(--earth);
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+.member-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.mi-father { background: rgba(61,43,31,.08); }
+.mi-mother { background: rgba(26,92,74,.08); }
+.mi-gp { background: rgba(200,169,110,.12); }
+.mi-sib { background: rgba(42,122,98,.1); }
+
+.person-card {
+  background: white; border: 0.5px solid var(--border);
+  border-radius: 12px; padding: 20px; margin-bottom: 12px;
+  position: relative; transition: border-color .2s;
+}
+.person-card:hover { border-color: rgba(200,169,110,.45); }
+.person-card-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.person-card-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; flex-shrink: 0;
+}
+.pca-earth { background: rgba(61,43,31,.1); color: var(--earth-mid); }
+.pca-green { background: rgba(26,92,74,.1); color: var(--accent); }
+.pca-gold { background: rgba(200,169,110,.2); color: var(--gold-dark); }
+.pca-teal { background: rgba(42,122,98,.1); color: var(--accent-light); }
+.person-card-label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.person-card-hint { font-size: 11px; color: rgba(122,102,85,.5); margin-top: 1px; }
+
+.card-delete {
+  position: absolute; top: 14px; right: 14px;
+  width: 24px; height: 24px; border-radius: 6px; border: none;
+  background: none; color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: all .2s;
+}
+.card-delete:hover { background: rgba(176,58,46,.08); color: #B03A2E; }
+
+/* Search existing */
+.search-existing {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+}
+.search-existing input { flex: 1; }
+.btn-sm {
+  padding: 8px 14px; font-size: 12px; border-radius: 6px;
+  cursor: pointer; border: 0.5px solid var(--border);
+  background: none; color: var(--text-muted); font-family: 'DM Sans', sans-serif;
+  white-space: nowrap; transition: all .2s;
+}
+.btn-sm:hover { background: var(--cream-dark); }
+.btn-sm-primary { background: var(--earth); color: var(--cream); border-color: var(--earth); }
+.btn-sm-primary:hover { background: var(--earth-mid); }
+
+/* Network match suggestion */
+.match-suggestion {
+  background: rgba(26,92,74,.05); border: 0.5px solid rgba(26,92,74,.2);
+  border-radius: 8px; padding: 12px 14px; margin-top: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.match-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(26,92,74,.12); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+.match-info { flex: 1; }
+.match-name { font-size: 13px; font-weight: 500; color: var(--earth); }
+.match-meta { font-size: 11px; color: var(--text-muted); }
+.match-badge { font-size: 10px; background: rgba(26,92,74,.1); color: var(--accent); padding: 3px 9px; border-radius: 12px; font-weight: 500; flex-shrink: 0; }
+
+/* Add another button */
+.add-another {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; border-radius: 8px;
+  border: 0.5px dashed var(--border); background: transparent;
+  font-size: 13px; color: var(--text-muted); cursor: pointer;
+  transition: all .2s; width: 100%; font-family: 'DM Sans', sans-serif;
+  margin-top: 4px;
+}
+.add-another:hover { border-color: var(--gold); color: var(--gold-dark); background: rgba(200,169,110,.04); }
+.add-another-icon { width: 22px; height: 22px; border-radius: 6px; background: rgba(200,169,110,.1); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--gold-dark); }
+
+/* Bottom bar */
+.ob-bottom-bar {
+  margin-top: auto; padding-top: 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 0.5px solid var(--border);
+}
+.btn { padding: 10px 24px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; border-radius: 6px; cursor: pointer; border: none; transition: all .2s; }
+.btn-ghost { background: transparent; border: 0.5px solid var(--border); color: var(--text-muted); }
+.btn-ghost:hover { background: var(--cream-dark); }
+.btn-primary { background: var(--earth); color: var(--cream); }
+.btn-primary:hover { background: var(--earth-mid); }
+.btn-gold { background: var(--gold-dark); color: white; }
+.btn-gold:hover { background: var(--gold); }
+
+/* TREE PREVIEW (step 5) */
+.tree-preview-wrap {
+  background: white; border: 0.5px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 24px;
+}
+.tree-preview-header {
+  padding: 14px 20px; border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 500; color: var(--earth);
+}
+.tree-preview-header .dots { display: flex; gap: 5px; }
+.tree-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Privacy toggles */
+.privacy-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 0.5px solid var(--border);
+}
+.privacy-item:last-child { border-bottom: none; }
+.privacy-info { flex: 1; }
+.privacy-title { font-size: 13px; font-weight: 500; color: var(--earth); margin-bottom: 2px; }
+.privacy-desc { font-size: 12px; color: var(--text-muted); }
+.toggle-wrap { flex-shrink: 0; }
+.toggle { position: relative; width: 38px; height: 22px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; cursor: pointer;
+  background: rgba(122,102,85,.2); border-radius: 11px; transition: .2s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  width: 16px; height: 16px; border-radius: 50%;
+  left: 3px; top: 3px; background: white; transition: .2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* SUCCESS */
+.success-wrap { text-align: center; padding: 40px 0; max-width: 460px; margin: 0 auto; }
+.success-tree-icon { font-size: 56px; margin-bottom: 20px; display: block; }
+.success-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; color: var(--earth); margin-bottom: 10px; line-height: 1.2; }
+.success-title em { font-style: italic; color: var(--gold-dark); }
+.success-sub { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 32px; }
+.next-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 28px; }
+.next-card {
+  background: white; border: 0.5px solid var(--border); border-radius: 10px;
+  padding: 16px 12px; text-align: center; cursor: pointer; transition: all .2s;
+}
+.next-card:hover { border-color: var(--gold); }
+.next-card-icon { font-size: 22px; margin-bottom: 8px; }
+.next-card-title { font-size: 12px; font-weight: 500; color: var(--earth); }
+.next-card-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+/* Clan chip */
+.clan-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.clan-chip {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  border: 0.5px solid var(--border); background: white; color: var(--text-muted);
+  cursor: pointer; transition: all .2s;
+}
+.clan-chip.sel { border-color: var(--gold-dark); background: rgba(200,169,110,.1); color: var(--gold-dark); }
+
+/* Relationship selector */
+.rel-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.rel-chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; border: 0.5px solid var(--border); background: white; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+.rel-chip.sel { border-color: var(--earth); background: rgba(61,43,31,.06); color: var(--earth); }
+@media (max-width: 980px) {
+  nav { flex-wrap: wrap; gap: 12px; padding: 14px 20px; }
+  .nav-right { width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+  .onboard-layout { grid-template-columns: 1fr; }
+  .ob-sidebar { padding: 28px 20px; }
+  .ob-panel { padding: 28px 20px; min-height: auto; }
+  .form-grid, .next-cards { grid-template-columns: 1fr; }
+  .next-cards { gap: 10px; }
+  .clan-chips, .rel-chips { justify-content: flex-start; }
+}
+@media (max-width: 640px) {
+  .ob-sidebar { padding: 22px 16px; }
+  .ob-panel { padding: 22px 16px; }
+  .ob-panel-title { font-size: 26px; }
+  .ob-step { gap: 10px; }
+  .step-desc, .step-name { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="window.location.href='index.html'">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="5" r="2.5" fill="#C8A96E"/>
+        <circle cx="4" cy="12" r="2" fill="#C8A96E" opacity=".6"/>
+        <circle cx="14" cy="12" r="2" fill="#C8A96E" opacity=".6"/>
+        <line x1="9" y1="7.5" x2="4" y2="10" stroke="#C8A96E" stroke-width="1" opacity=".5"/>
+        <line x1="9" y1="7.5" x2="14" y2="10" stroke="#C8A96E" stroke-width="1" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="logo-text">Kin<span>Link</span></div>
+  </div>
+  <div class="nav-right">
+    <span>Setting up your family tree</span>
+    <span class="skip-link" onclick="goStep(6)">Skip for now →</span>
+  </div>
+</nav>
+
+<div class="onboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="ob-sidebar">
+    <div class="ob-sidebar-bg"></div>
+    <svg class="ob-sidebar-tree" viewBox="0 0 280 600" preserveAspectRatio="none">
+      <line x1="140" y1="580" x2="140" y2="320" stroke="white" stroke-width="1.2"/>
+      <line x1="140" y1="400" x2="70" y2="240" stroke="white" stroke-width=".9"/>
+      <line x1="140" y1="400" x2="210" y2="240" stroke="white" stroke-width=".9"/>
+      <line x1="70" y1="260" x2="30" y2="130" stroke="white" stroke-width=".6"/>
+      <line x1="70" y1="260" x2="110" y2="130" stroke="white" stroke-width=".6"/>
+      <line x1="210" y1="260" x2="170" y2="130" stroke="white" stroke-width=".6"/>
+      <line x1="210" y1="260" x2="250" y2="130" stroke="white" stroke-width=".6"/>
+    </svg>
+    <div class="ob-sidebar-inner">
+      <div class="ob-welcome">
+        <div class="ob-welcome-label">Welcome, Amara</div>
+        <div class="ob-welcome-name">Build your<br><em>family tree</em></div>
+        <div class="ob-welcome-sub">6 steps to plant your roots in the KinLink network.</div>
+      </div>
+
+      <div class="ob-steps" id="step-list">
+        <div class="ob-step active" onclick="goStep(1)">
+          <div class="step-circle" id="sc1">1</div>
+          <div class="step-info">
+            <div class="step-name">Your profile</div>
+            <div class="step-desc">Confirm your personal details</div>
+          </div>
+        </div>
+        <div class="ob-step" onclick="goStep(2)">
+          <div class="step-circle" id="sc2">2</div>
+          <div class="step-info">
+            <div class="step-name">Add your father</div>
+            <div class="step-desc">Paternal lineage & clan</div>
+          </div>
+        </div>
+        <div class="ob-step" onclick="goStep(3)">
+          <div class="step-circle" id="sc3">3</div>
+          <div class="step-info">
+            <div class="step-name">Add your mother</div>
+            <div class="step-desc">Maternal lineage & clan</div>
+          </div>
+        </div>
+        <div class="ob-step" onclick="goStep(4)">
+          <div class="step-circle" id="sc4">4</div>
+          <div class="step-info">
+            <div class="step-name">Grandparents</div>
+            <div class="step-desc">Paternal & maternal sides</div>
+          </div>
+        </div>
+        <div class="ob-step" onclick="goStep(5)">
+          <div class="step-circle" id="sc5">5</div>
+          <div class="step-info">
+            <div class="step-name">Siblings & children</div>
+            <div class="step-desc">Extend your branch</div>
+          </div>
+        </div>
+        <div class="ob-step" onclick="goStep(6)">
+          <div class="step-circle" id="sc6">6</div>
+          <div class="step-info">
+            <div class="step-name">Privacy & review</div>
+            <div class="step-desc">Control visibility & launch</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-progress">
+        <div class="ob-progress-label">
+          <span id="prog-label">Step 1 of 6</span>
+          <span id="prog-pct">17%</span>
+        </div>
+        <div class="ob-progress-track">
+          <div class="ob-progress-fill" id="prog-fill" style="width:17%"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN PANELS -->
+  <main class="ob-main">
+
+    <!-- ══ STEP 1: Your Profile ══ -->
+    <div class="ob-panel active" id="panel1">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 1 · Your profile</div>
+        <div class="ob-panel-title">Confirm your<br><em>personal details</em></div>
+        <div class="ob-panel-sub">We've pre-filled this from your registration. Review and add any missing information — this becomes your node in the family graph.</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>First name <span class="required">*</span></label>
+          <input type="text" value="Amara">
+        </div>
+        <div class="form-group">
+          <label>Last name <span class="required">*</span></label>
+          <input type="text" value="Nkosi">
+        </div>
+        <div class="form-group">
+          <label>Middle name(s)</label>
+          <input type="text" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Date of birth <span class="required">*</span></label>
+          <input type="date" value="1990-03-14">
+        </div>
+        <div class="form-group">
+          <label>Gender <span class="required">*</span></label>
+          <select><option>Female</option><option>Male</option><option>Prefer not to say</option></select>
+        </div>
+        <div class="form-group">
+          <label>Marital status</label>
+          <select><option>Single</option><option>Married</option><option>Widowed</option><option>Divorced</option></select>
+        </div>
+        <div class="form-group full">
+          <label>Clan / family name <span class="required">*</span></label>
+          <div class="clan-chips" style="margin-top:6px">
+            <div class="clan-chip sel" onclick="tc(this)">Nkosi</div>
+            <div class="clan-chip" onclick="tc(this)">Dube</div>
+            <div class="clan-chip" onclick="tc(this)">Moyo</div>
+            <div class="clan-chip" onclick="tc(this)">Zulu</div>
+            <div class="clan-chip" onclick="tc(this)">Ndlovu</div>
+            <div class="clan-chip" onclick="tc(this)">Mthembu</div>
+            <div class="clan-chip" onclick="tc(this)">+ Other</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tribe / ethnic group</label>
+          <input type="text" value="Ndebele">
+        </div>
+        <div class="form-group">
+          <label>Totem / praise name</label>
+          <input type="text" value="Elephant (Ndlovu)">
+        </div>
+        <div class="form-group">
+          <label>Village / hometown</label>
+          <input type="text" value="Bulawayo">
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <select><option>Zimbabwe</option><option>Nigeria</option><option>Kenya</option><option>South Africa</option><option>Ghana</option></select>
+        </div>
+        <div class="form-group full">
+          <label>Short bio (optional)</label>
+          <textarea rows="2" placeholder="A brief note about yourself, your family background or community…"></textarea>
+        </div>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <span style="font-size:12px;color:var(--text-muted)">Your information is private by default.</span>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="goStep(2)">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: Father ══ -->
+    <div class="ob-panel" id="panel2">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 2 · Paternal lineage</div>
+        <div class="ob-panel-title">Add your <em>father</em></div>
+        <div class="ob-panel-sub">Your father's node connects you to the paternal clan. If he's already on KinLink, you can link directly to his existing profile.</div>
+      </div>
+
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-father">👨</div>
+          Father's information
+        </div>
+
+        <!-- Search existing first -->
+        <div style="margin-bottom:16px">
+          <label>Search if he's already on KinLink</label>
+          <div class="search-existing">
+            <input type="text" placeholder="Search by name, clan or village…" id="father-search" oninput="showMatch('father-match', this.value)">
+            <button class="btn-sm">Search</button>
+          </div>
+          <div class="match-suggestion" id="father-match" style="display:none">
+            <div class="match-avatar">JN</div>
+            <div class="match-info">
+              <div class="match-name">Joseph Nkosi</div>
+              <div class="match-meta">Born 1958 · Nkosi Clan · Bulawayo · 247 relatives in network</div>
+            </div>
+            <button class="btn-sm btn-sm-primary" onclick="linkProfile('father-match')">Link profile</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          <div style="flex:1;height:0.5px;background:var(--border)"></div>
+          <span style="font-size:11px;color:var(--text-muted)">or add manually</span>
+          <div style="flex:1;height:0.5px;background:var(--border)"></div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-earth">JN</div>
+            <div>
+              <div class="person-card-label">Father</div>
+              <div class="person-card-hint">Required for paternal lineage</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First name <span class="required">*</span></label>
+              <input type="text" value="Joseph">
+            </div>
+            <div class="form-group">
+              <label>Last name <span class="required">*</span></label>
+              <input type="text" value="Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Date of birth</label>
+              <input type="date" value="1958-07-22">
+            </div>
+            <div class="form-group">
+              <label>Living status</label>
+              <select><option>Living</option><option>Deceased</option><option>Unknown</option></select>
+            </div>
+            <div class="form-group">
+              <label>Clan</label>
+              <input type="text" value="Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Village / hometown</label>
+              <input type="text" value="Bulawayo">
+            </div>
+            <div class="form-group full">
+              <label>Father's father (grandfather name)</label>
+              <input type="text" placeholder="e.g. Baba Nkosi Sr.">
+              <div class="help-text">Helps trace paternal lineage further back.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="goStep(3)">Skip this step</button>
+          <button class="btn btn-primary" onclick="goStep(3)">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: Mother ══ -->
+    <div class="ob-panel" id="panel3">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 3 · Maternal lineage</div>
+        <div class="ob-panel-title">Add your <em>mother</em></div>
+        <div class="ob-panel-sub">Your mother's node anchors your maternal clan connection — often the most critical for cousin detection in African family networks.</div>
+      </div>
+
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-mother">👩</div>
+          Mother's information
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label>Search if she's already on KinLink</label>
+          <div class="search-existing">
+            <input type="text" placeholder="Search by name, clan or village…" id="mother-search" oninput="showMatch('mother-match', this.value)">
+            <button class="btn-sm">Search</button>
+          </div>
+          <div class="match-suggestion" id="mother-match" style="display:none">
+            <div class="match-avatar" style="background:rgba(26,92,74,.12);color:var(--accent)">GM</div>
+            <div class="match-info">
+              <div class="match-name">Grace Moyo</div>
+              <div class="match-meta">Born 1961 · Moyo Clan · Bulawayo · 183 relatives in network</div>
+            </div>
+            <button class="btn-sm btn-sm-primary" onclick="linkProfile('mother-match')">Link profile</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          <div style="flex:1;height:0.5px;background:var(--border)"></div>
+          <span style="font-size:11px;color:var(--text-muted)">or add manually</span>
+          <div style="flex:1;height:0.5px;background:var(--border)"></div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-green">GM</div>
+            <div>
+              <div class="person-card-label">Mother</div>
+              <div class="person-card-hint">Include maiden name for better matching</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First name <span class="required">*</span></label>
+              <input type="text" value="Grace">
+            </div>
+            <div class="form-group">
+              <label>Married surname</label>
+              <input type="text" value="Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Maiden / birth clan name</label>
+              <input type="text" value="Moyo">
+            </div>
+            <div class="form-group">
+              <label>Date of birth</label>
+              <input type="date" value="1961-11-05">
+            </div>
+            <div class="form-group">
+              <label>Living status</label>
+              <select><option>Living</option><option>Deceased</option><option>Unknown</option></select>
+            </div>
+            <div class="form-group">
+              <label>Village / hometown</label>
+              <input type="text" value="Bulawayo">
+            </div>
+            <div class="form-group">
+              <label>Tribe / ethnic group</label>
+              <input type="text" placeholder="e.g. Shona">
+            </div>
+            <div class="form-group">
+              <label>Totem</label>
+              <input type="text" placeholder="e.g. Fish (Hove)">
+            </div>
+            <div class="form-group full">
+              <label>Mother's mother (grandmother name)</label>
+              <input type="text" placeholder="e.g. Gogo Moyo">
+              <div class="help-text">Helps trace maternal lineage and detect shared grandparent relationships.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="goStep(4)">Skip this step</button>
+          <button class="btn btn-primary" onclick="goStep(4)">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: Grandparents ══ -->
+    <div class="ob-panel" id="panel4">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 4 · Grandparents</div>
+        <div class="ob-panel-title">Your <em>grandparents</em></div>
+        <div class="ob-panel-sub">Grandparent nodes are the most powerful connectors in the graph — they reveal cousin relationships across hundreds of extended family members.</div>
+      </div>
+
+      <!-- Paternal grandfather -->
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-gp">👴</div>
+          Paternal side (father's parents)
+        </div>
+        <div class="person-card">
+          <button class="card-delete" title="Remove"><i class="ti ti-x"></i></button>
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-earth">BN</div>
+            <div>
+              <div class="person-card-label">Paternal Grandfather</div>
+              <div class="person-card-hint">Father's father</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" value="Baba Nkosi Sr.">
+            </div>
+            <div class="form-group">
+              <label>Approximate birth year</label>
+              <input type="text" value="c. 1930">
+            </div>
+            <div class="form-group">
+              <label>Clan</label>
+              <input type="text" value="Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Living status</label>
+              <select><option>Deceased</option><option>Living</option><option>Unknown</option></select>
+            </div>
+            <div class="form-group">
+              <label>Year of death</label>
+              <input type="text" value="2010">
+            </div>
+            <div class="form-group">
+              <label>Village of origin</label>
+              <input type="text" value="Bulawayo">
+            </div>
+          </div>
+        </div>
+
+        <div class="person-card" style="margin-top:0">
+          <button class="card-delete" title="Remove"><i class="ti ti-x"></i></button>
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-gold">DN</div>
+            <div>
+              <div class="person-card-label">Paternal Grandmother</div>
+              <div class="person-card-hint">Father's mother (maiden name important)</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" placeholder="e.g. Gogo Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Maiden / birth clan</label>
+              <input type="text" placeholder="e.g. Dube">
+            </div>
+            <div class="form-group">
+              <label>Approximate birth year</label>
+              <input type="text" placeholder="e.g. c. 1935">
+            </div>
+            <div class="form-group">
+              <label>Living status</label>
+              <select><option>Unknown</option><option>Living</option><option>Deceased</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maternal grandparents -->
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-gp">👵</div>
+          Maternal side (mother's parents)
+        </div>
+
+        <div class="person-card">
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-green">GM</div>
+            <div>
+              <div class="person-card-label">Maternal Grandmother</div>
+              <div class="person-card-hint">Mother's mother — key for cousin matching</div>
+            </div>
+          </div>
+          <div class="match-suggestion" style="margin-bottom:14px">
+            <div class="match-avatar">GM</div>
+            <div class="match-info">
+              <div class="match-name">Gogo Moyo (1935–2018)</div>
+              <div class="match-meta">Found in network · Moyo Clan · Connected to 312 members</div>
+            </div>
+            <button class="btn-sm btn-sm-primary">Link ✓</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" value="Gogo Moyo">
+            </div>
+            <div class="form-group">
+              <label>Maiden clan</label>
+              <input type="text" value="Zulu">
+            </div>
+            <div class="form-group">
+              <label>Birth year</label>
+              <input type="text" value="c. 1935">
+            </div>
+            <div class="form-group">
+              <label>Year of death</label>
+              <input type="text" value="2018">
+            </div>
+          </div>
+        </div>
+
+        <div class="person-card">
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-teal">MM</div>
+            <div>
+              <div class="person-card-label">Maternal Grandfather</div>
+              <div class="person-card-hint">Mother's father</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" placeholder="e.g. Mkhulu Moyo">
+            </div>
+            <div class="form-group">
+              <label>Clan</label>
+              <input type="text" placeholder="e.g. Moyo">
+            </div>
+            <div class="form-group">
+              <label>Approximate birth year</label>
+              <input type="text" placeholder="e.g. c. 1932">
+            </div>
+            <div class="form-group">
+              <label>Living status</label>
+              <select><option>Unknown</option><option>Living</option><option>Deceased</option></select>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-another" onclick="alert('Great-grandparent form would open here')">
+          <div class="add-another-icon">+</div>
+          Add great-grandparents (optional — extends to 6th generation)
+        </button>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="goStep(5)">Skip this step</button>
+          <button class="btn btn-primary" onclick="goStep(5)">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 5: Siblings & Children ══ -->
+    <div class="ob-panel" id="panel5">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 5 · Siblings & children</div>
+        <div class="ob-panel-title">Extend your <em>branch</em></div>
+        <div class="ob-panel-sub">Add siblings and your own children to broaden your node's connections. Each one enriches the graph and improves relationship detection for the whole community.</div>
+      </div>
+
+      <!-- Siblings -->
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-sib">👫</div>
+          Siblings
+        </div>
+
+        <div class="person-card">
+          <button class="card-delete"><i class="ti ti-x"></i></button>
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-earth">SN</div>
+            <div>
+              <div class="person-card-label">Brother — Sibo Nkosi</div>
+              <div class="person-card-hint">Shared both parents</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" value="Sibonelo Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Date of birth</label>
+              <input type="date" value="1987-04-10">
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select><option>Male</option><option>Female</option></select>
+            </div>
+            <div class="form-group">
+              <label>Relationship type</label>
+              <div class="rel-chips" style="margin-top:6px">
+                <div class="rel-chip sel" onclick="tr(this)">Full sibling</div>
+                <div class="rel-chip" onclick="tr(this)">Half (same father)</div>
+                <div class="rel-chip" onclick="tr(this)">Half (same mother)</div>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label>KinLink profile (if they're already on the platform)</label>
+              <div class="search-existing">
+                <input type="text" placeholder="Search to link existing profile…">
+                <button class="btn-sm">Find</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="person-card">
+          <button class="card-delete"><i class="ti ti-x"></i></button>
+          <div class="person-card-header">
+            <div class="person-card-avatar pca-green">TN</div>
+            <div>
+              <div class="person-card-label">Sister — Thuli Nkosi</div>
+              <div class="person-card-hint">Shared both parents</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" value="Thulisile Nkosi">
+            </div>
+            <div class="form-group">
+              <label>Date of birth</label>
+              <input type="date" value="1993-09-18">
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select><option>Female</option><option>Male</option></select>
+            </div>
+            <div class="form-group">
+              <label>Relationship type</label>
+              <div class="rel-chips" style="margin-top:6px">
+                <div class="rel-chip sel" onclick="tr(this)">Full sibling</div>
+                <div class="rel-chip" onclick="tr(this)">Half (same father)</div>
+                <div class="rel-chip" onclick="tr(this)">Half (same mother)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="add-another" id="add-sibling-btn" onclick="addSiblingCard()">
+          <div class="add-another-icon">+</div>
+          Add another sibling
+        </button>
+      </div>
+
+      <!-- Children -->
+      <div class="member-section">
+        <div class="member-section-title">
+          <div class="member-icon mi-sib">🧒</div>
+          Your children (optional)
+        </div>
+        <div style="background:rgba(200,169,110,.06);border:0.5px solid var(--border);border-radius:10px;padding:16px;font-size:13px;color:var(--text-muted);margin-bottom:12px">
+          Adding your children now creates downward branches in the tree and lets them find and connect their own node later.
+        </div>
+        <button class="add-another" onclick="alert('Child entry form would open here')">
+          <div class="add-another-icon">+</div>
+          Add a child
+        </button>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <button class="btn btn-ghost" onclick="goStep(4)">← Back</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" onclick="goStep(6)">Skip this step</button>
+          <button class="btn btn-primary" onclick="goStep(6)">Save & Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 6: Privacy & Review ══ -->
+    <div class="ob-panel" id="panel6">
+      <div class="ob-panel-header">
+        <div class="ob-step-tag">Step 6 · Privacy & review</div>
+        <div class="ob-panel-title">Review &amp; <em>go live</em></div>
+        <div class="ob-panel-sub">Choose who can see your profile and family connections, then launch your tree into the KinLink network.</div>
+      </div>
+
+      <!-- Tree preview -->
+      <div class="tree-preview-wrap">
+        <div class="tree-preview-header">
+          <span>Your family tree preview</span>
+          <div class="dots">
+            <div class="tree-dot" style="background:#E8A0A0"></div>
+            <div class="tree-dot" style="background:#E8D080"></div>
+            <div class="tree-dot" style="background:#90D890"></div>
+          </div>
+        </div>
+        <svg width="100%" viewBox="0 0 640 220" style="padding:20px 30px;display:block">
+          <!-- GP level -->
+          <rect x="40" y="16" width="110" height="38" rx="7" fill="rgba(200,169,110,.12)" stroke="rgba(200,169,110,.35)" stroke-width="0.5"/>
+          <text x="95" y="31" text-anchor="middle" fill="#9B7A3D" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Baba Nkosi Sr.</text>
+          <text x="95" y="46" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Pat. Grandfather</text>
+
+          <rect x="165" y="16" width="110" height="38" rx="7" fill="rgba(200,169,110,.08)" stroke="rgba(200,169,110,.25)" stroke-width="0.5"/>
+          <text x="220" y="31" text-anchor="middle" fill="#9B7A3D" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Gogo Nkosi</text>
+          <text x="220" y="46" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Pat. Grandmother</text>
+
+          <rect x="360" y="16" width="110" height="38" rx="7" fill="rgba(26,92,74,.1)" stroke="rgba(26,92,74,.3)" stroke-width="0.5"/>
+          <text x="415" y="31" text-anchor="middle" fill="#1A5C4A" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Gogo Moyo</text>
+          <text x="415" y="46" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Mat. Grandmother</text>
+
+          <rect x="485" y="16" width="110" height="38" rx="7" fill="rgba(26,92,74,.06)" stroke="rgba(26,92,74,.2)" stroke-width="0.5"/>
+          <text x="540" y="31" text-anchor="middle" fill="#1A5C4A" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Mkhulu Moyo</text>
+          <text x="540" y="46" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Mat. Grandfather</text>
+
+          <!-- Parent level lines from GPs -->
+          <line x1="150" y1="35" x2="165" y2="35" stroke="rgba(200,169,110,.3)" stroke-width="0.5" stroke-dasharray="3 2"/>
+          <line x1="157" y1="35" x2="157" y2="100" stroke="rgba(200,169,110,.3)" stroke-width="0.8"/>
+          <line x1="157" y1="100" x2="215" y2="100" stroke="rgba(200,169,110,.3)" stroke-width="0.8"/>
+          <line x1="470" y1="35" x2="485" y2="35" stroke="rgba(26,92,74,.25)" stroke-width="0.5" stroke-dasharray="3 2"/>
+          <line x1="477" y1="35" x2="477" y2="100" stroke="rgba(26,92,74,.25)" stroke-width="0.8"/>
+          <line x1="420" y1="100" x2="477" y2="100" stroke="rgba(26,92,74,.25)" stroke-width="0.8"/>
+
+          <!-- Parents -->
+          <rect x="160" y="82" width="120" height="40" rx="7" fill="rgba(61,43,31,.08)" stroke="rgba(61,43,31,.25)" stroke-width="1"/>
+          <text x="220" y="97" text-anchor="middle" fill="#3D2B1F" font-size="11" font-family="DM Sans,sans-serif" font-weight="500">Joseph Nkosi</text>
+          <text x="220" y="112" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Father · 1958</text>
+
+          <rect x="360" y="82" width="120" height="40" rx="7" fill="rgba(26,92,74,.08)" stroke="rgba(26,92,74,.25)" stroke-width="1"/>
+          <text x="420" y="97" text-anchor="middle" fill="#1A5C4A" font-size="11" font-family="DM Sans,sans-serif" font-weight="500">Grace Moyo</text>
+          <text x="420" y="112" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Mother · 1961</text>
+
+          <!-- Marriage line -->
+          <line x1="280" y1="102" x2="360" y2="102" stroke="rgba(200,169,110,.5)" stroke-width="0.8" stroke-dasharray="4 3"/>
+          <text x="320" y="98" text-anchor="middle" fill="rgba(200,169,110,.6)" font-size="8" font-family="DM Sans,sans-serif">married</text>
+
+          <!-- Line to YOU -->
+          <line x1="320" y1="122" x2="320" y2="158" stroke="rgba(155,122,61,.5)" stroke-width="1.2"/>
+
+          <!-- YOU -->
+          <rect x="248" y="158" width="144" height="46" rx="9" fill="rgba(200,169,110,.12)" stroke="#9B7A3D" stroke-width="1.5"/>
+          <text x="320" y="176" text-anchor="middle" fill="#3D2B1F" font-size="12" font-family="Cormorant Garamond,serif" font-weight="600">Amara Nkosi</text>
+          <text x="320" y="191" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">You · 1990 · Nkosi Clan</text>
+
+          <!-- Siblings -->
+          <rect x="60" y="168" width="100" height="36" rx="6" fill="white" stroke="rgba(200,169,110,.2)" stroke-width="0.5"/>
+          <text x="110" y="183" text-anchor="middle" fill="#6B4C35" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Sibo Nkosi</text>
+          <text x="110" y="196" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Brother · 1987</text>
+
+          <rect x="480" y="168" width="100" height="36" rx="6" fill="white" stroke="rgba(200,169,110,.2)" stroke-width="0.5"/>
+          <text x="530" y="183" text-anchor="middle" fill="#6B4C35" font-size="10" font-family="DM Sans,sans-serif" font-weight="500">Thuli Nkosi</text>
+          <text x="530" y="196" text-anchor="middle" fill="#7A6655" font-size="9" font-family="DM Sans,sans-serif">Sister · 1993</text>
+
+          <!-- Sibling lines -->
+          <line x1="160" y1="186" x2="200" y2="186" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+          <line x1="200" y1="158" x2="200" y2="186" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+          <line x1="200" y1="158" x2="248" y2="158" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+          <line x1="392" y1="158" x2="440" y2="158" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+          <line x1="440" y1="158" x2="440" y2="186" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+          <line x1="440" y1="186" x2="480" y2="186" stroke="rgba(200,169,110,.25)" stroke-width="0.8"/>
+        </svg>
+      </div>
+
+      <!-- Summary counts -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
+        <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--earth)">8</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Family members added</div>
+        </div>
+        <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--accent)">3</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Generations traced</div>
+        </div>
+        <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--gold-dark)">4</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Clans connected</div>
+        </div>
+        <div style="background:white;border:0.5px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--earth-mid)">1</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Network match found</div>
+        </div>
+      </div>
+
+      <!-- Privacy settings -->
+      <div style="background:white;border:0.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+        <div style="font-size:13px;font-weight:500;color:var(--earth);margin-bottom:4px">Privacy settings</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Control who can see your family information.</div>
+        <div class="privacy-item">
+          <div class="privacy-info">
+            <div class="privacy-title">Show my full name publicly</div>
+            <div class="privacy-desc">Visible to all KinLink users on search</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-info">
+            <div class="privacy-title">Show my date of birth</div>
+            <div class="privacy-desc">Only visible to connected relatives</div>
+          </div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-info">
+            <div class="privacy-title">Allow relationship checks by other users</div>
+            <div class="privacy-desc">Others can check if they're related to you</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-info">
+            <div class="privacy-title">Show my family tree to community</div>
+            <div class="privacy-desc">Your tree nodes are visible to verified members</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="privacy-item">
+          <div class="privacy-info">
+            <div class="privacy-title">Request verification from family elder</div>
+            <div class="privacy-desc">Send your tree to a Family Head for verification badge</div>
+          </div>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="ob-bottom-bar">
+        <button class="btn btn-ghost" onclick="goStep(5)">← Back</button>
+        <button class="btn btn-gold" onclick="goStep(7)" style="padding:12px 32px;font-size:14px">🌳 Launch my family tree →</button>
+      </div>
+    </div>
+
+    <!-- ══ DONE ══ -->
+    <div class="ob-panel" id="panel7">
+      <div style="display:flex;align-items:center;justify-content:center;flex:1">
+        <div class="success-wrap">
+          <span class="success-tree-icon">🌳</span>
+          <div class="success-title">Your tree is<br><em>alive.</em></div>
+          <div class="success-sub">Amara, your family node is now live in the KinLink network. 8 family members have been added across 3 generations and 4 clans.<br><br>1 network match was found — <strong>Gogo Moyo</strong> is already connected to 312 other members.</div>
+
+          <div class="next-cards">
+            <div class="next-card">
+              <div class="next-card-icon">🔍</div>
+              <div class="next-card-title">Check a relationship</div>
+              <div class="next-card-desc">Search and compare two people</div>
+            </div>
+            <div class="next-card">
+              <div class="next-card-icon">👥</div>
+              <div class="next-card-title">Invite relatives</div>
+              <div class="next-card-desc">Share your KinLink profile link</div>
+            </div>
+            <div class="next-card">
+              <div class="next-card-icon">📜</div>
+              <div class="next-card-title">Request verification</div>
+              <div class="next-card-desc">Get your tree verified by an elder</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="window.location.href='user dashboard.html'" style="width:100%;padding:13px;font-size:14px">Go to my dashboard →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let current = 1;
+const total = 6;
+
+function goStep(n) {
+  // Hide all panels
+  document.querySelectorAll('.ob-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel' + n).classList.add('active');
+
+  // Update sidebar steps
+  const steps = document.querySelectorAll('.ob-step');
+  steps.forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i + 1 < n) s.classList.add('done');
+    else if (i + 1 === n) s.classList.add('active');
+  });
+
+  // Update step circles
+  for (let i = 1; i <= total; i++) {
+    const sc = document.getElementById('sc' + i);
+    if (!sc) continue;
+    if (i < n) sc.textContent = '✓';
+    else sc.textContent = i;
+  }
+
+  // Update progress
+  const pct = n <= total ? Math.round(((n - 1) / total) * 100) : 100;
+  document.getElementById('prog-fill').style.width = (n > total ? 100 : pct) + '%';
+  document.getElementById('prog-label').textContent = n <= total ? 'Step ' + n + ' of ' + total : 'Complete!';
+  document.getElementById('prog-pct').textContent = (n > total ? 100 : pct) + '%';
+
+  current = n;
+  window.scrollTo(0, 0);
+}
+
+function tc(el) {
+  document.querySelectorAll('.clan-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function tr(el) {
+  const parent = el.closest('.rel-chips');
+  parent.querySelectorAll('.rel-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function showMatch(id, val) {
+  const el = document.getElementById(id);
+  if (val.length > 2) el.style.display = 'flex';
+  else el.style.display = 'none';
+}
+
+function linkProfile(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = 'rgba(26,92,74,.4)';
+  el.querySelector('.btn-sm-primary').textContent = 'Linked ✓';
+  el.querySelector('.btn-sm-primary').style.background = 'var(--accent)';
+}
+
+function addSiblingCard() {
+  const btn = document.getElementById('add-sibling-btn');
+  const card = document.createElement('div');
+  card.className = 'person-card';
+  card.style.marginBottom = '12px';
+  card.innerHTML = `
+    <button class="card-delete" onclick="this.closest('.person-card').remove()"><i class="ti ti-x"></i></button>
+    <div class="person-card-header">
+      <div class="person-card-avatar pca-teal" style="font-size:14px;font-weight:600">?</div>
+      <div><div class="person-card-label">Sibling</div><div class="person-card-hint">Add their details below</div></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>First name</label><input type="text" placeholder="First name"></div>
+      <div class="form-group"><label>Last name</label><input type="text" placeholder="Last name"></div>
+      <div class="form-group"><label>Date of birth</label><input type="date"></div>
+      <div class="form-group"><label>Gender</label><select><option>Male</option><option>Female</option></select></div>
+    </div>`;
+  btn.parentNode.insertBefore(card, btn);
+}
+</script>
+</body>
+</html>
